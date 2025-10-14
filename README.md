@@ -786,3 +786,109 @@ case .unknown:
 ```
 <br><br><br><br>
 
+
+# 🧱 Struct - Class - actor 
+
+<br><br>
+
+# 1️⃣ Struct — Value Type
+- A Struct is a Value Type that is copied when passed around.
+- Each variable has its own independent copy.
+```swift
+struct UserStruct {
+    var name: String
+    var age: Int
+}
+
+var user1 = UserStruct(name: "Ali", age: 25)
+var user2 = user1 // copied value
+user2.name = "Omar"
+
+print(user1.name) // Ali
+print(user2.name) // Omar
+```
+
+<br><br>
+
+# 2️⃣ Class — Reference Type
+- A Class is a Reference Type — variables share the same instance.
+- Both references point to one object in Heap memory.
+```swift
+class UserClass {
+    var name: String
+    init(name: String) { self.name = name }
+}
+
+var c1 = UserClass(name: "Ali")
+var c2 = c1
+c2.name = "Omar"
+
+print(c1.name) // Omar
+print(c2.name) // Omar
+```
+
+<br><br>
+
+# 3️⃣ Actor — Safe Reference Type (Swift Concurrency)
+- An Actor is a Reference Type like a class,
+- but it’s thread-safe — no data races.
+- Only one task can access its data at a time.
+- Other tasks wait until the current one finishes.
+```swift
+actor UserActor {
+    var balance = 100
+    
+    func deposit(amount: Int) {
+        balance += amount
+        print("💰 New balance: \(balance)")
+    }
+    
+    func withdraw(amount: Int) {
+        balance -= amount
+        print("💸 Withdraw, remaining: \(balance)")
+    }
+}
+
+let sharedAccount = UserActor()
+
+Task { await sharedAccount.deposit(amount: 50) }
+Task { await sharedAccount.withdraw(amount: 30) }
+Task {
+    print("✅ Final balance:", await sharedAccount.balance)
+}
+```
+<br><br>
+
+## 💡 Struct vs Class vs Actor
+
+<br>
+
+| Feature       |    Struct    |     Class    |        Actor       |
+| ------------- | :----------: | :----------: | :----------------: |
+| Type          |     Value    |   Reference  |      Reference     |
+| Memory        |     Stack    |     Heap     |        Heap        |
+| Copy Behavior |    Copied    |    Shared    |  Shared (isolated) |
+| Inheritance   |       ❌      |       ✅      |          ❌         |
+| Thread Safety |       ✅      |       ❌      |          ✅         |
+| Performance   |    ⚡ Fast    |   🐢 Medium  | 🐢 Safe but slower |
+| Use For       | Models, data | Shared logic | Async shared state |
+
+<br><br>
+
+## Value Type vs Reference Type
+
+<br>
+
+| Concept                                     | Value Type                                 | Reference Type                             |
+| ------------------------------------------- | ------------------------------------------ | ------------------------------------------ |
+| **Storage**                                 | 🧮 Stack                                   | 📦 Heap                                    |
+| **Copy behavior**                           | Creates new independent copy               | Shares the same instance                   |
+| **Thread safety**                           | ✅ Safe (no shared data)                    | ⚠️ Not safe (use `actor` for safety)       |
+| **Effect on other variables when modified** | ❌ Change in one **does NOT** affect others | ✅ Change in one **affects all** references |
+| **Examples**                                | `Struct`, `Enum`, `Tuple`                  | `Class`, `Actor`, `Closure`                |
+
+<br>
+
+### 💡 Explanation:
+- When you assign a Value Type, Swift creates a copy → changes in one variable don’t affect another.
+- When you assign a Reference Type, Swift just copies the reference (pointer) → both variables point to the same object.

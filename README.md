@@ -892,3 +892,147 @@ Task {
 ### 💡 Explanation:
 - When you assign a Value Type, Swift creates a copy → changes in one variable don’t affect another.
 - When you assign a Reference Type, Swift just copies the reference (pointer) → both variables point to the same object.
+
+<br><br><br><br>
+
+
+# 🧱 Properties 
+- Properties are values associated with a type (struct, class, or enum).  
+- They store or compute data that belongs to that instance or the type itself.
+
+
+## 1️⃣ Stored Properties
+Store constant or variable values inside a type.
+```swift
+struct Car {
+    var brand: String
+    var speed: Int
+}
+```
+<br>
+
+## 2️⃣ Lazy Stored Properties
+- Initialized only when accessed for the first time.
+- Useful for expensive operations.
+```swift
+struct DataLoader {
+    var filename: String
+    
+    lazy var fileData: String = {
+        print("Loading...")
+        return "File content of \(filename)"
+    }()
+}
+```
+<br>
+
+## 3️⃣ Computed Properties
+They don’t store data — they calculate it dynamically.
+```swift
+struct Rectangle {
+    var width: Double
+    var height: Double
+    var area: Double { width * height }
+}
+
+// OR
+
+struct Circle {
+    var radius: Double
+    var diameter: Double {
+        get { radius * 2 }
+        set { radius = newValue / 2 }
+    }
+}
+
+```
+<br>
+
+## 4️⃣ Property Observers
+Run code before or after a property changes using willSet and didSet.
+```swift
+class StepCounter {
+    var steps: Int = 0 {
+        willSet { print("About to set steps to \(newValue)") }
+        didSet { print("Added \(steps - oldValue) steps") }
+    }
+}
+```
+<br>
+
+## 5️⃣ Type Properties
+Belong to the type itself, not an instance.
+```swift
+struct Student {
+    static var schoolName = "Green School"
+    var name: String
+}
+```
+<br>
+
+## 6️⃣ Property Wrappers
+###💡 Definition
+- A property wrapper defines reusable logic for how a property’s value is stored, validated, or transformed.
+- Instead of repeating the same didSet or get/set logic everywhere,
+- you can define it once and apply it using @YourWrapper.
+```swift
+@propertyWrapper
+struct Capitalized {
+    private var text = ""
+    var wrappedValue: String {
+        get { text }
+        set { text = newValue.capitalized }
+    }
+}
+
+struct User {
+    @Capitalized var firstName: String
+    @Capitalized var lastName: String
+}
+
+//EXAMPLE 2
+
+@propertyWrapper
+struct Clamped<Value: Comparable> {
+    var value: Value
+    let range: ClosedRange<Value>
+    
+    var wrappedValue: Value {
+        get { value }
+        set { value = min(max(range.lowerBound, newValue), range.upperBound) }
+    }
+    
+    init(wrappedValue initialValue: Value, _ range: ClosedRange<Value>) {
+        self.value = min(max(range.lowerBound, initialValue), range.upperBound)
+        self.range = range
+    }
+}
+
+struct GameSettings {
+    @Clamped(0...100) var volume: Int = 50
+}
+
+```
+<br>
+
+## 7️⃣ Effect of Change (Value Type vs Reference Type)
+
+| Type               | Behavior                              | Example        |
+| ------------------ | ------------------------------------- | -------------- |
+| **Value Type**     | Each copy is independent              | Structs, Enums |
+| **Reference Type** | All references point to same instance | Classes        |
+
+```swift
+struct ValueExample { var value = 10 }
+class ReferenceExample { var value = 10 }
+
+var v1 = ValueExample()
+var v2 = v1
+v2.value = 99 // only v2 changed
+
+var r1 = ReferenceExample()
+var r2 = r1
+r2.value = 99 // both r1 and r2 changed
+```
+<br><br><br><br>
+

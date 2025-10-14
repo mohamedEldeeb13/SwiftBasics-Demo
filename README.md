@@ -506,4 +506,159 @@ Return functions from functions:
 ```swift
 	func makeAdder(x: Int) -> (Int) -> Int { ... }
 ```
+<br><br><br><br>
+
+
+# 🧩 Closure
+- A closure is a self-contained block of functionality that can be passed around and used in your code.
+- Closures can capture and store references to constants and variables from the context in which they are defined.
+
+<br><br>
+
+## 1️⃣ Basic Closure
+A simple closure with no parameters and no return value.
+```swift
+let simpleClosure = {
+	 print("Hello from a closure!")
+}
+simpleClosure()
+```
+<br>
+
+## 2️⃣ Closure with Parameters
+A closure that accepts parameters.
+```swift
+let greetClosure: (String) -> Void = { name in
+    print("Hello, \(name)!")
+}
+greetClosure("Mohamed")
+```
+<br>
+
+## 3️⃣ Closure with Return Value
+A closure that takes parameters and returns a value.
+```swift
+let addClosure: (Int, Int) -> Int = { a, b in
+    return a + b
+}
+let sum = addClosure(10, 5)
+print("Sum:", sum)
+```
+<br>
+
+## 4️⃣ Closure as a Function Parameter
+Passing a closure as a parameter to a function.
+```swift
+func performOperation(_ a: Int, _ b: Int, operation: (Int, Int) -> Int) {
+    let result = operation(a, b)
+    print("Result:", result)
+}
+performOperation(8, 2, operation: addClosure)
+performOperation(8, 2, operation: { $0 * $1 })
+```
+<br>
+
+## 5️⃣ Trailing Closure Syntax
+- If the last parameter of a function is a closure, you can use trailing closure syntax, Using trailing closure syntax for cleaner code
+- Single-expression closures can omit the 'return' keyword.
+```swift
+func performOperation(_ a: Int, _ b: Int, operation: (Int, Int) -> Int) {
+    let result = operation(a, b)
+    print("Result:", result)
+}
+performOperation(10, 3) { $0 - $1 }
+```
+<br>
+
+## 6️⃣ Capturing Values
+- Closures can capture constants and variables from the surrounding context.	
+- Here, the returned closure "remembers" the value of 'total' even after the function returns.
+```swift
+func makeIncrementer(forIncrement amount: Int) -> () -> Int {
+    var total = 0
+    let incrementer: () -> Int = {
+        total += amount
+        return total
+    }
+    return incrementer
+}
+
+let incrementByFive = makeIncrementer(forIncrement: 5)
+print(incrementByFive()) // 5
+print(incrementByFive()) // 10
+print(incrementByFive()) // 15
+```
+<br>
+
+## 7️⃣ Closures Returning Closures
+A closure that returns another closure, allowing dynamic behavior.
+```swift
+func makeMultiplier(_ factor: Int) -> (Int) -> Int {
+    return { number in number * factor }
+}
+let multiplyByThree = makeMultiplier(3)
+print(multiplyByThree(10)) // 30
+```
+<br>
+
+## 5️⃣ Trailing Closure Syntax
+If the last parameter of a function is a closure, you can use trailing closure syntax, Using trailing closure syntax for cleaner code
+// Single-expression closures can omit the 'return' keyword.
+```swift
+func performOperation(_ a: Int, _ b: Int, operation: (Int, Int) -> Int) {
+    let result = operation(a, b)
+    print("Result:", result)
+}
+performOperation(10, 3) { $0 - $1 }
+```
+<br>
+
+## 🔹 Closure Types
+### Are closures reference types?
+- ✅ Yes. Closures in Swift are reference types — they capture and store values from their surrounding context.	
+- Assigning a closure to another variable shares the same captured values.
+
+<br><br>
+
+## 1️⃣ Escaping Closures
+Called after the function returns. Useful for async operations and completion handlers.
+```swift
+var completionHandlers: [() -> Void] = []
+
+@MainActor
+func someFunctionWithEscapingClosure(completion: @escaping () -> Void) {
+    completionHandlers.append(completion)
+}
+
+someFunctionWithEscapingClosure {
+    print("Escaping closure called later")
+}
+
+completionHandlers.forEach { $0() }
+```
+<br>
+
+## 2️⃣ Non-Escaping Closures
+Executed within the function scope. Default in Swift. Cannot be stored for later use.
+```swift
+func someFunctionWithNonEscapingClosure(closure: () -> Void) {
+    closure()
+}
+
+someFunctionWithNonEscapingClosure {
+    print("Non-escaping closure executed immediately")
+}
+```
+<br>
+
+## 3️⃣ Autoclosures
+Automatically wraps an expression in a closure, delaying its execution until needed.
+```swift
+func logIfTrue(_ predicate: @autoclosure () -> Bool) {
+    if predicate() { print("True!") } else { print("False!") }
+}
+
+logIfTrue(2 > 1)
+logIfTrue(3 < 2)
+```
 <br>

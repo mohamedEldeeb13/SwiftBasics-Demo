@@ -408,3 +408,102 @@ fetchData()
 - Closing files or network connections
 - Releasing resources
 - Printing final logs
+
+<br><br><br><br>
+
+# 📘 Swift Functions Playground
+Functions are self-contained chunks of code that perform a specific task.
+
+<br>
+
+## 1️⃣ Basic Function
+A simple function with no parameters or return value:
+```swift
+func greet() {
+	print("Hello, Swift!")
+}
+```
+<br>
+
+## 2️⃣ Function with Parameters
+Pass data into functions:
+```swift
+func greet(person: String) {
+	print("Hello, \(person)!")
+}
+```
+<br>
+
+## 3️⃣ Multiple Parameters
+Functions can have multiple inputs:
+```swift
+func greet(person: String, age: Int) {
+	print("Hello \(person), you are \(age) years old!")
+}
+```
+<br>
+
+## 4️⃣ Function with Return Value
+Functions can return a value:
+```swift
+func add(a: Int, b: Int) -> Int {
+	return a + b
+}
+```
+<br>
+
+## 5️⃣ External & Internal Parameter Names
+Control how parameters are used inside and outside the function:
+```swift
+	func multiply(_ a: Int, by b: Int) -> Int { ... }
+```
+<br>
+
+## 6️⃣ Default Parameters
+Provide default values for parameters:
+```swift
+	func greetWithDefault(name: String = "Guest") { ... }
+```
+<br>
+
+## 7️⃣ Variadic Parameters
+Accept multiple values of the same type:
+```swift
+	func sumAll(numbers: Int...) -> Int { ... }
+```
+<br>
+
+## 8️⃣ Inout Parameters
+Allow modification of external variables:
+```swift
+	func increment(value: inout Int) { ... }
+```
+<br>
+
+## 9️⃣ Functions Returning Multiple Values
+Use tuples to return multiple results:
+```swift
+	func minMax(numbers: [Int]) -> (min: Int, max: Int)? { ... }
+```
+<br>
+
+## 🔟 Nested Functions
+Functions can be defined inside other functions:
+```swift
+	func chooseStepFunction(backward: Bool) -> (Int) -> Int { ... }
+```
+<br>
+
+## 1️⃣1️⃣ Functions as Parameters
+Pass functions as arguments to other functions:
+```swift
+	func printResult(of operation: (Int, Int) -> Int, a: Int, b: Int) { ... }
+```
+<br>
+
+## 1️⃣2️⃣ Functions Returning Functions
+Return functions from functions:
+```swift
+	func makeAdder(x: Int) -> (Int) -> Int { ... }
+```
+<br>

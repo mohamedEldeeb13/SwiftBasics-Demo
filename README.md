@@ -1121,4 +1121,111 @@ print(Toggle.description())
 <br><br><br><br>
 
 
+# 🧩 Subscripts
+A subscript allows you to access elements inside a collection, list, or sequence using a custom indexing
+
+<br><br>
+
+## 1️⃣ Basic Subscript
+
+**Example:**
+```swift
+struct DaysOfWeek {
+    let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    
+    subscript(index: Int) -> String {
+        return days[index]
+    }
+}
+
+let week = DaysOfWeek()
+print(week[0]) // Sunday
+print(week[3]) // Wednesday
+```
+<br>
+
+## 2️⃣ Subscript with Get and Set
+Subscripts can be read-write, allowing both reading and writing values using index syntax.
+
+```swift
+struct SquareTable {
+    var data = [1: 1, 2: 4, 3: 9]
+    
+    subscript(number: Int) -> Int {
+        get {
+            data[number] ?? 0
+        }
+        set(newValue) {
+            data[number] = newValue
+        }
+    }
+}
+
+var table = SquareTable()
+print(table[2])   // 4
+table[4] = 16
+print(table[4])   // 16
+```
+<br>
+
+## 3️⃣ Subscript with Multiple Parameters
+Subscripts can accept multiple parameters, which is useful for accessing multidimensional data such as grids or matrices.
+
+```swift
+struct Matrix {
+    var grid: [[Int]]
+    
+    subscript(row: Int, column: Int) -> Int {
+        get { grid[row][column] }
+        set(newValue) { grid[row][column] = newValue }
+    }
+}
+
+var matrix = Matrix(grid: [[1, 2], [3, 4]])
+print(matrix[0, 1]) // 2
+matrix[1, 0] = 10
+print(matrix.grid)
+```
+<br>
+
+## 4️⃣ Subscript Overloading
+You can define multiple subscripts in the same type, as long as their parameter types differ. This is known as subscript overloading.
+
+```swift
+struct DataStorage {
+    var numbers = [1, 2, 3, 4]
+    var words = ["One", "Two", "Three"]
+    
+    subscript(index: Int) -> Int {
+        return numbers[index]
+    }
+    
+    subscript(index: String) -> String {
+        return words[Int(index)! - 1]
+    }
+}
+
+let storage = DataStorage()
+print(storage[1])     // 2
+print(storage["2"])   // Two
+```
+
+<br>
+
+## 5️⃣ Read-Only Subscript
+- If a subscript only includes a get block (and no set), it becomes read-only.
+- You can use this for computed values that don’t need to be changed directly.
+```swift
+struct MultiplicationTable {
+    let multiplier: Int
+    
+    subscript(index: Int) -> Int {
+        multiplier * index
+    }
+}
+
+let threeTimes = MultiplicationTable(multiplier: 3)
+print(threeTimes[4])  // 12
+```
+<br><br><br><br>
 

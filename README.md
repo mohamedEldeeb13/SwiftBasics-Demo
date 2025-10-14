@@ -601,7 +601,7 @@ print(multiplyByThree(10)) // 30
 ```
 <br>
 
-## 5️⃣ Trailing Closure Syntax
+## 8️⃣ Trailing Closure Syntax
 If the last parameter of a function is a closure, you can use trailing closure syntax, Using trailing closure syntax for cleaner code
 // Single-expression closures can omit the 'return' keyword.
 ```swift
@@ -661,4 +661,128 @@ func logIfTrue(_ predicate: @autoclosure () -> Bool) {
 logIfTrue(2 > 1)
 logIfTrue(3 < 2)
 ```
+<br><br><br><br>
+
+# 🧭 Enums
+An enumeration defines a common type for a group of related values and enables you to work with those values in a type-safe way within your code.
+
+<br><br>
+
+## 1️⃣Basic enum
+Enums define a group of related values in a type-safe way.
+```swift
+enum CompassPoint {
+    case north, south, east, west
+}
+```
 <br>
+
+## 2️⃣ Enum with raw values
+- Raw values give each case a constant underlying value.
+- Can be of type Int, String, Double, etc.
+```swift
+enum HTTPStatus: Int {
+    case ok = 200
+    case created = 201
+    case accepted = 202
+    case noContent = 204
+    case badRequest = 400
+    case unauthorized = 401
+    case forbidden = 403
+    case notFound = 404
+}
+let status = HTTPStatus(rawValue: 200)
+print("HTTPStatus from raw value 200 →", String(describing: status))
+```
+<br>
+
+## 3️⃣CaseIterable — Iterate All Cases
+CaseIterable allows looping through all enum cases using `allCases`.
+```swift
+enum Planet: CaseIterable {
+    case mercury, venus, earth, mars, jupiter, saturn, uranus, neptune
+}
+
+for p in Planet.allCases {
+    print("Planet:", p)
+}
+```
+<br>
+
+## 4️⃣ Associated Values
+- Enums can store associated data for each case.
+- This lets you attach extra information per case.
+```swift
+enum Barcode {
+    case upc(Int, Int, Int, Int)
+    case qrCode(String)
+}
+```
+<br>
+
+## 5️⃣ Enums with Methods & Computed Properties
+Enums can have functions and computed properties to add logic.
+```swift
+enum Suit: String {
+    case hearts, diamonds, clubs, spades
+
+    var color: String {
+        switch self {
+        case .hearts, .diamonds: return "red"
+        case .clubs, .spades: return "black"
+        }
+    }
+
+    func symbol() -> String {
+        switch self {
+        case .hearts: return "♥︎"
+        case .diamonds: return "♦︎"
+        case .clubs: return "♣︎"
+        case .spades: return "♠︎"
+        }
+    }
+}
+```
+<br>
+
+## 6️⃣ Mutating Methods
+- Enums are value types (like structs).
+- Use `mutating` to modify `self` inside enum methods.
+```swift
+enum LightSwitch {
+    case on, off
+
+    mutating func toggle() {
+        self = (self == .on) ? .off : .on
+    }
+}
+
+var bulb = LightSwitch.off
+bulb.toggle()
+```
+<br>
+
+## 7️⃣ Pattern Matching & Where Clause
+Use `switch` with associated values, bindings, and conditions.
+```swift
+enum Measurement {
+    case weight(Double)
+    case length(Double)
+    case unknown
+}
+
+let m = Measurement.weight(65.0)
+
+switch m {
+case .weight(let kg) where kg > 50:
+    print("Heavy weight:", kg, "kg")
+case .weight(let kg):
+    print("Weight:", kg, "kg")
+case .length(let cm):
+    print("Length:", cm, "cm")
+case .unknown:
+    print("Unknown measurement")
+}
+```
+<br><br><br><br>
+

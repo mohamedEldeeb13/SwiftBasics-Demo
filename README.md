@@ -1541,6 +1541,7 @@ if let city = user?.address?.city {
     print("City not available")
 }
 ```
+
 <br>
 
 ## 2️⃣ Guard Binding (guard let)
@@ -1555,6 +1556,7 @@ func showCity(for user: User?) {
     print("City is \(city)")
 }
 ```
+
 <br>
 
 ## 3️⃣ Nil-Coalescing Operator (??)
@@ -1573,3 +1575,128 @@ Crashes the app if the optional is nil.
 ```swift
 let city = user!.address!.city! // ❌ Dangerous if any is nil
 ```
+<br><br><br><br>
+
+# 🧩 Swift Type Casting Playground
+is, as, as?, as!, Any, and AnyObject — with clear explanations and examples.
+
+<br>
+
+##  1️⃣ Basic Class Hierarchy
+```swift
+class Animal {
+    var name: String
+    init(name: String) { self.name = name }
+    func speak() { print("\(name) makes a sound") }
+}
+
+class Dog: Animal {
+    var boneCount: Int
+    init(name: String, boneCount: Int = 0) {
+        self.boneCount = boneCount
+        super.init(name: name)
+    }
+    override func speak() { print("\(name) says: Woof!") }
+    func fetch() { print("\(name) fetched a bone. Total: \(boneCount)") }
+}
+
+class Cat: Animal {
+    var lives: Int = 9
+    override func speak() { print("\(name) says: Meow") }
+}
+```
+```swift
+let animals: [Animal] = [
+    Dog(name: "Rex", boneCount: 3),
+    Cat(name: "Mittens"),
+    Animal(name: "Generic")
+]
+```
+
+<br>
+
+## 🔍 2️⃣ is — Type Checking
+- Use is to check an object’s type.
+- It returns true or false.
+```swift
+for a in animals {
+    if a is Dog {
+        print("\(a.name) is a Dog")
+    } else if a is Cat {
+        print("\(a.name) is a Cat")
+    } else {
+        print("\(a.name) is some other Animal")
+    }
+}
+```
+
+<br>
+
+## 💡 3️⃣ as? — Conditional Downcast (Safe)
+- Use as? when you’re not sure of the type.
+- It returns an optional — nil if casting fails.
+```swift
+for a in animals {
+    if let dog = a as? Dog {
+        dog.fetch()
+    } else if let cat = a as? Cat {
+        print("\(cat.name) has \(cat.lives) lives")
+    } else {
+        print("\(a.name) cannot be cast to Dog or Cat")
+    }
+}
+```
+
+<br>
+
+## ⚠️ 4️⃣ as! — Forced Downcast (Dangerous)
+- Use only when you’re 100% sure of the type.
+- If wrong, the app crashes.
+```swift
+let maybeDog = animals[0]
+let forcedDog = maybeDog as! Dog
+forcedDog.fetch()
+```
+### ❌ This would crash:
+```swift
+let crashDog = animals[2] as! Dog
+```
+
+<br>
+
+## 🎭 5️⃣ Any and AnyObject
+- Any can represent any type (value or reference).
+- AnyObject represents class instances only.
+```swift
+var miscellaneous: [Any] = [42, "hello", Dog(name: "Spot"), 3.14]
+for item in miscellaneous {
+    switch item {
+    case let x as Int: print("Int: \(x)")
+    case let s as String: print("String: \(s)")
+    case let d as Dog: print("Dog named \(d.name)")
+    case is Double: print("Double encountered")
+    default: print("Unknown type")
+    }
+}
+
+var objectArray: [AnyObject] = [Dog(name: "Alpha") as AnyObject, NSDate()]
+for o in objectArray { print("Object: \(type(of: o))") }
+```
+
+<br>
+
+## 6️⃣ Pattern Matching in switch
+```swift
+for item in miscellaneous {
+    switch item {
+    case let n as Int where n > 10: print("Large Int: \(n)")
+    case let n as Int: print("Small Int: \(n)")
+    case let dog as Dog: print("Switch: Dog named \(dog.name)")
+    case let s as String: print("Switch: String \(s)")
+    default: print("Switch: other")
+    }
+}
+```
+
+<br><br><br><br>
+

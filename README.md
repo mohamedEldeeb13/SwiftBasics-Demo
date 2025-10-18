@@ -1468,3 +1468,108 @@ do {
 | **Required Initializer**           | ❌                                       | ✅                                                  |
 | **Deinitializer (`deinit`)**       | ❌                                       | ✅                                                  |
 | **Inheritance / super.init()**     | ❌                                       | ✅                                                  |
+
+<br><br><br><br>
+
+# 🧩 Optional Chaining
+- Lets you query and call properties, methods, and subscripts on an optional that might currently be `nil`.
+- If any link in the chain is `nil`, the whole expression returns `nil` — safely.
+- The result of an optional chaining expression is an optional.
+
+## 1) Simple property access
+
+```swift
+class Room {
+    var name: String
+    init(name: String) { self.name = name }
+}
+
+class House {
+    var livingRoom: Room?
+}
+
+var house: House? = House()
+
+// livingRoom is nil -> optional chaining returns nil
+p(house?.livingRoom?.name as Any) // prints "nil"
+
+// make living room
+house?.livingRoom = Room(name: "Main")
+
+// now optional chaining retrieves the name as an optional String
+p(house?.livingRoom?.name as Any) // Optional("Main")
+
+// because result is optional, you can use nil-coalescing
+p(house?.livingRoom?.name ?? "No room") // "Main"
+```
+
+---
+
+## 2) Calling methods via optional chaining
+
+```swift
+class Dog {
+    func bark() -> String { "Woof" }
+}
+
+class Person {
+    var dog: Dog?
+}
+
+var person: Person? = Person()
+
+// dog is nil -> call returns nil
+let barkResult = person?.dog?.bark()
+p(type(of: barkResult), barkResult as Any) // Optional<String>
+
+// add a dog & call again
+person?.dog = Dog()
+person?.dog?.bark() // Optional("Woof")
+```
+
+---
+
+## 🔹 How to Safely Unwrap Optionals
+There are 4 main ways to handle optionals safely instead of force-unwrapping (!).
+
+## 1️⃣ Optional Binding (if let)
+Safely unwraps if the value exists.
+```swift
+if let city = user?.address?.city {
+    print("City is \(city)")
+} else {
+    print("City not available")
+}
+```
+<br>
+
+## 2️⃣ Guard Binding (guard let)
+Used when you must have a value to continue execution.
+
+```swift
+func showCity(for user: User?) {
+    guard let city = user?.address?.city else {
+        print("No city found")
+        return
+    }
+    print("City is \(city)")
+}
+```
+<br>
+
+## 3️⃣ Nil-Coalescing Operator (??)
+Provides a default value if the optional is nil.
+
+```swift
+let cityName = user?.address?.city ?? "Unknown City"
+print(cityName)
+```
+
+---
+
+## 4️⃣ Force Unwrap (!) — Avoid unless absolutely sure
+Crashes the app if the optional is nil.
+
+```swift
+let city = user!.address!.city! // ❌ Dangerous if any is nil
+```

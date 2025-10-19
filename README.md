@@ -1700,3 +1700,235 @@ for item in miscellaneous {
 
 <br><br><br><br>
 
+# 🧩 Swift Protocols Playground
+A **protocol** defines a blueprint of methods, properties, and other requirements that suit a particular piece of functionality.
+
+<br>
+
+## 1️⃣ Defining a Protocol
+
+```swift
+protocol Greetable {
+    var name: String { get }
+    func greet()
+}
+
+struct Person: Greetable {
+    var name: String
+    func greet() {
+        print("Hello, I'm \(name) 👋")
+    }
+}
+
+let person = Person(name: "Mohamed")
+person.greet()
+```
+
+<br>
+
+## 2️⃣ Property Requirements
+
+- `get` → read-only  
+- `get set` → read/write
+
+```swift
+protocol Vehicle {
+    var brand: String { get }
+    var currentSpeed: Double { get set }
+    func accelerate()
+}
+
+struct Car: Vehicle {
+    let brand: String
+    var currentSpeed: Double = 0.0
+    
+    func accelerate() {
+        print("\(brand) accelerating at \(currentSpeed) km/h 🚗💨")
+    }
+}
+
+var car = Car(brand: "Toyota", currentSpeed: 80)
+car.accelerate()
+```
+
+<br>
+
+## 3️⃣ Mutating Method Requirements
+Mutating methods can modify `self` inside structs/enums
+```swift
+protocol Togglable {
+    mutating func toggle()
+}
+
+enum SwitchState: Togglable {
+    case on, off
+    
+    mutating func toggle() {
+        self = (self == .on) ? .off : .on
+    }
+}
+
+var light = SwitchState.off
+light.toggle()
+print("Light is now: \(light) 💡")
+```
+
+<br>
+
+## 4️⃣ Initializer Requirements
+
+```swift
+protocol Initializable {
+    init(value: Int)
+}
+
+class Example: Initializable {
+    required init(value: Int) {
+        print("Example initialized with \(value)")
+    }
+}
+
+let ex = Example(value: 5)
+```
+
+<br>
+
+## 5️⃣ Protocol Inheritance
+
+```swift
+protocol Shape {
+    var area: Double { get }
+}
+
+protocol ColoredShape: Shape {
+    var color: String { get }
+}
+
+struct Circle: ColoredShape {
+    var radius: Double
+    var color: String
+    var area: Double { .pi * radius * radius }
+}
+
+let circle = Circle(radius: 3, color: "Red")
+print("Circle area: \(circle.area), color: \(circle.color) 🎨")
+```
+
+<br>
+
+## 6️⃣ Protocol Composition
+ Combine multiple protocols temporarily with `&`
+```swift
+protocol Named {
+    var name: String { get }
+}
+protocol Aged {
+    var age: Int { get }
+}
+
+struct User: Named, Aged {
+    var name: String
+    var age: Int
+}
+
+func celebrateBirthday(of celebrator: Named & Aged) {
+    print("🎂 Happy birthday, \(celebrator.name), now \(celebrator.age + 1)!")
+}
+
+let user = User(name: "Sara", age: 24)
+celebrateBirthday(of: user)
+```
+
+<br>
+
+## 7️⃣ Protocol Extensions (Default Implementations)
+
+```swift
+protocol Describable {
+    func describe()
+}
+
+extension Describable {
+    func describe() {
+        print("This is a describable type 🧱")
+    }
+}
+
+struct Book: Describable {}
+let b = Book()
+b.describe()
+```
+
+<br>
+
+## 8️⃣ Protocols with Associated Types
+ Associated type acts as a placeholder type within a protocol
+```swift
+protocol Container {
+    associatedtype Item
+    mutating func append(_ item: Item)
+    var count: Int { get }
+    subscript(i: Int) -> Item { get }
+}
+
+struct IntStack: Container {
+    var items = [Int]()
+    
+    mutating func append(_ item: Int) {
+        items.append(item)
+    }
+    
+    var count: Int { items.count }
+    
+    subscript(i: Int) -> Int {
+        items[i]
+    }
+}
+
+var stack = IntStack()
+stack.append(10)
+stack.append(20)
+print("Stack count: \(stack.count), top: \(stack[1]) 📦")
+```
+
+<br><br>
+
+## 9️⃣ ❓ Protocol is Value Type or Reference Type?
+
+🧠 **Answer:**  
+A protocol itself is **not** a type like struct or class — it’s a **blueprint**.  
+It takes on the type of whatever conforms to it.
+
+- If a **struct** conforms → behaves as **value type**  
+- If a **class** conforms → behaves as **reference type**
+
+```swift
+protocol ExampleProtocol {
+    func showType()
+}
+
+struct ValueTypeStruct: ExampleProtocol {
+    func showType() { print("I'm a struct ➡️ value type ✅") }
+}
+
+class ReferenceTypeClass: ExampleProtocol {
+    func showType() { print("I'm a class ➡️ reference type 🔁") }
+}
+
+var value: ExampleProtocol = ValueTypeStruct()
+var reference: ExampleProtocol = ReferenceTypeClass()
+
+value.showType()
+reference.showType()
+
+// Verify behavior
+var a = ValueTypeStruct()
+var bb = a // Copy (value type)
+print("Struct copied independently ✅")
+
+var c = ReferenceTypeClass()
+var d = c // Reference (same object)
+print("Class shares same instance 🔁")
+```
+
+<br><br><br><br>

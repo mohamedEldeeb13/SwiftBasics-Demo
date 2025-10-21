@@ -1932,3 +1932,237 @@ print("Class shares same instance 🔁")
 ```
 
 <br><br><br><br>
+
+# 🧩 Automatic Reference Counting (ARC)
+
+- ARC automatically manages the memory of class instances in Swift.
+- It tracks how many *strong references* exist for each instance.
+- When the count reaches **zero**, the instance is *deallocated* and its `deinit` method runs.
+- ARC only applies to **class** instances (reference types), not structs or enums.
+
+<br><br>
+
+## 1️⃣ ARC BASICS --- Reference Counting
+
+``` swift
+class Person {
+    let name: String
+    init(name: String) {
+        self.name = name
+        print("\(name) is being initialized")
+    }
+    deinit {
+        print("\(name) is being deinitialized")
+    }
+}
+
+// Example: Strong references
+var ref1: Person?
+var ref2: Person?
+var ref3: Person?
+
+ref1 = Person(name: "Alice")   // ARC count = 1
+ref2 = ref1                    // ARC count = 2
+ref3 = ref1                    // ARC count = 3
+
+// ARC won’t free memory until all strong references are nil.
+ref1 = nil                     // ARC count = 2
+ref2 = nil                     // ARC count = 1
+ref3 = nil                     // 💥 deinit runs here — ARC frees Alice
+```
+
+<br>
+
+## 2️⃣ STRONG REFERENCE CYCLES (Retain Cycles)
+
+- When two class instances hold **strong references** to each other, their reference counts never reach zero → they stay in memory forever.
+
+``` swift
+class Apartment {
+    var tenant: PersonWithApartment?
+    deinit { print("Apartment deinitialized") }
+}
+
+class PersonWithApartment {
+    var name: String
+    var apartment: Apartment?
+    init(name: String) { self.name = name }
+    deinit { print("PersonWithApartment \(name) deinitialized") }
+}
+
+do {
+    var john: PersonWithApartment? = PersonWithApartment(name: "John")
+    var apt: Apartment? = Apartment()
+
+    john!.apartment = apt
+    apt!.tenant = john // 🔄 Strong reference cycle formed
+
+    john = nil
+    apt = nil // ❌ Neither deinit runs — retain cycle (memory leak)
+}
+```
+
+### ARC Count Table
+
+  | Action                        | Person ARC | Apartment ARC | Notes                                                  |
+| ----------------------------- | ----------- | --------------| ------------------------------------------------------- |
+| After creation                | 1           | 1              | each held by variable                                  |
+| After `john!.apartment = apt` | 1           | **2**          | strong ref from `john`                                 |
+| After `apt!.tenant = john`    | **2**       | **2**          | cycle begins                                           |
+| After `john = nil`            | 1           | 2              | still held by `apt.tenant`                             |
+| After `apt = nil`             | 1           | 1              | both keep each other alive — ❌ memory leak             |
+| Final state                   | ❌ not deinit | ❌ not deinit | trapped in memory due to retain cycle                  |
+
+<br>
+
+## 3️⃣ BREAKING RETAIN CYCLES --- Weak & Unowned References
+
+-🔹 `weak` → does **not** increase ARC count; can become nil.
+-🔹 `unowned` → does **not** increase ARC count; never nil.
+
+- Use `weak` when the reference may go away (e.g., parent-child).
+- Use `unowned` when both objects have the same lifetime.
+
+### Weak Reference Example
+
+``` swift
+class ApartmentWeak {
+    weak var tenant: PersonWeak?
+    deinit { print("ApartmentWeak deinitialized") }
+}
+
+class PersonWeak {
+    var name: String
+    var apartment: ApartmentWeak?
+    init(name: String) { self.name = name }
+    deinit { print("PersonWeak \(name) deinitialized") }
+}
+
+do {
+    var john: PersonWeak? = PersonWeak(name: "John")
+    var apt: ApartmentWeak? = ApartmentWeak()
+
+    john!.apartment = apt
+    apt!.tenant = john // ✅ weak reference — no cycle
+
+    john = nil  // 💥 PersonWeak deinit runs
+    apt = nil   // 💥 ApartmentWeak deinit runs
+}
+```
+
+### Unowned Reference Example
+
+``` swift
+class CreditCard {
+    let number: UInt64
+    unowned let customer: Customer
+    init(number: UInt64, customer: Customer) {
+        self.number = number
+        self.customer = customer
+    }
+    deinit { print("CreditCard #\(number) deinitialized") }
+}
+
+class Customer {
+    let name: String
+    var card: CreditCard?
+    init(name: String) { self.name = name }
+    deinit { print("Customer \(name) deinitialized") }
+}
+
+do {
+    var bob: Customer? = Customer(name: "Bob")
+    bob!.card = CreditCard(number: 1234_5678_9012_3456, customer: bob!)
+    bob = nil // ✅ both deinit properly
+}
+```
+
+<br>
+
+## 4️⃣ STRONG REFERENCE CYCLES IN CLOSURES
+
+- Closures are reference types too.
+- If a class property holds a closure that captures `self` strongly, it can create a **retain cycle**.
+
+``` swift
+class HTMLElement {
+    let name: String
+    let text: String?
+
+    lazy var asHTML: () -> String = {
+        if let text = self.text {
+            return "<\(self.name)>\(text)</\(self.name)>"
+        } else {
+            return "<\(self.name) />"
+        }
+    }
+
+    init(name: String, text: String? = nil) {
+        self.name = name
+        self.text = text
+    }
+
+    deinit { print("\(name) element deinitialized") }
+}
+
+do {
+    var paragraph: HTMLElement? = HTMLElement(name: "p", text: "Hello ARC")
+    print(paragraph!.asHTML())
+    paragraph = nil // ❌ deinit not called — retain cycle
+}
+```
+
+<br>
+
+## 5️⃣ FIXING CLOSURE CYCLES --- Capture Lists
+
+- Capture lists let you explicitly control how values are captured.
+-   `[weak self]` → self becomes optional; may become nil.
+-   `[unowned self]` → self never nil; used when lifetime is linked.
+
+``` swift
+class HTMLElementFixed {
+    let name: String
+    let text: String?
+
+    lazy var asHTML: () -> String = { [unowned self] in
+        if let text = self.text {
+            return "<\(self.name)>\(text)</\(self.name)>"
+        } else {
+            return "<\(self.name) />"
+        }
+    }
+
+    init(name: String, text: String? = nil) {
+        self.name = name
+        self.text = text
+    }
+
+    deinit { print("\(name) element deinitialized ✅") }
+}
+
+do {
+    var paragraph: HTMLElementFixed? = HTMLElementFixed(name: "p", text: "ARC works!")
+    print(paragraph!.asHTML())
+    paragraph = nil // ✅ deinit called properly
+}
+```
+<br><br>
+
+### 💡 ARC Reference Type Comparison
+
+| Feature / Type                                 |                     **Strong Reference**                     |                   **Weak Reference**                   |                                    **Unowned Reference**                                   |
+| :--------------------------------------------- | :----------------------------------------------------------: | :----------------------------------------------------: | :----------------------------------------------------------------------------------------: |
+| **Definition**                                 | Default reference type; keeps a strong hold on the instance. |   Holds a reference **without increasing** ARC count.  | Similar to weak, doesn’t increase ARC count, but assumes the instance will never be `nil`. |
+| **ARC Count Effect**                           |                 Increases ARC count by **+1**                |             Does **not** increase ARC count            |                               Does **not** increase ARC count                              |
+| **Optional or Non-Optional**                   |                   Usually **non-optional**                   |          Always **optional (`var x: Class?`)**         |                                   Always **non-optional**                                  |
+| **Automatically set to `nil` on deallocation** |                             ❌ No                             |                          ✅ Yes                         |                    ❌ No (leads to crash if accessed after deallocation)                    |
+| **Risk of Retain Cycle**                       |                   ✅ High (default behavior)                  |                  ❌ Low (breaks cycle)                  |                                    ❌ Low (breaks cycle)                                    |
+| **Typical Use Case**                           |       Most references in normal ownership relationships      | When reference may become `nil`, e.g. delegate pattern |         When both instances have the same lifetime, e.g. parent-child relationship         |
+| **Example Code**                               |                 `swift var car: Car? = Car()`                |         `swift weak var delegate: MyDelegate?`         |                              `swift unowned var owner: Person`                             |
+| **Memory Safety**                              |               Safe (object guaranteed to exist)              |                  Safe (auto nils out)                  |                          Unsafe (can crash if object deallocated)                          |
+| **Best For**                                   |                   Default object ownership                   |        Avoiding cycles when one side can be nil        |                 Avoiding cycles when both sides must always exist together                 |
+
+<br><br><br><br>
+
+

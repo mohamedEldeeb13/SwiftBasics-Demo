@@ -2264,3 +2264,154 @@ move(&origin.x, &origin.y)   // ✅ different properties → safe
 - But if both parameters refer to the same memory, Swift throws a compile-time error.
 
 <br><br><br><br>
+
+# 🧩 Access Control
+- Access Control in Swift in a clear and structured way. Access control is a feature in Swift that lets you restrict access to parts of your code `(classes, structs, properties, methods, etc.)` from code in other modules or files.
+- This is important for `encapsulation and safety`.
+
+<br><br>
+
+## 1️⃣ Access Levels in Swift
+Swift provides five access levels:
+
+| Access Level  | Description                                                                                                   | Example Usage                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `open`        | Highest (least restrictive). Allows entities to be accessed **and subclassed/overridden** outside the module. | Classes intended to be subclassed by other modules. |
+| `public`      | Can be accessed outside the module but **cannot be subclassed/overridden**.                                   | APIs, frameworks.                                   |
+| `internal`    | Default level. Accessible **within the same module**.                                                         | Most app code.                                      |
+| `fileprivate` | Accessible **only within the same file**.                                                                     | Helper methods shared inside one file.              |
+| `private`     | Accessible **only within the enclosing declaration**.                                                         | Hide implementation details from other code.        |
+
+<br><br>
+
+## 2️⃣ Syntax Examples
+
+<br>
+
+### a) Class and Methods
+```swift
+public class Vehicle {
+    public var name: String
+    private var engineCode: String
+    
+    init(name: String, engineCode: String) {
+        self.name = name
+        self.engineCode = engineCode
+    }
+    
+    fileprivate func startEngine() {
+        print("Engine started")
+    }
+    
+    private func secretFunction() {
+        print("This is private")
+    }
+}
+```
+- `name` → accessible everywhere (`public`)
+- `engineCode` → only inside Vehicle (`private`)
+- `startEngine()` → only inside this file (`fileprivate`)
+- `secretFunction()` → only inside this class (`private`)
+
+<br>
+
+### b) Structs and Enums
+```swift
+struct Car {
+    private var brand: String
+    var model: String
+    
+    init(brand: String, model: String) {
+        self.brand = brand
+        self.model = model
+    }
+    
+    private func showBrand() {
+        print(brand)
+    }
+}
+```
+- `brand` → hidden outside the struct
+- `model` → default `internal`, accessible in the module
+
+<br>
+
+### c) Using open vs public vs internal
+```swift
+// Open Class
+open class OpenVehicle {
+    open func drive() {
+        print("OpenVehicle is driving")
+    }
+    
+    public func start() {
+        print("OpenVehicle started")
+    }
+}
+
+// Public Class
+public class PublicVehicle {
+    public func drive() {
+        print("PublicVehicle is driving")
+    }
+    
+    public func start() {
+        print("PublicVehicle started")
+    }
+}
+
+// Internal Class (for comparison)
+class InternalVehicle {
+	func drive() {
+	    print("InternalVehicle is driving")
+    }
+}
+
+// ✅ Subclassing open class
+class Car: OpenVehicle {
+    // ✅ Can override open method
+    override func drive() {
+        print("Car is driving")
+    }
+    
+    // ❌ Cannot override public method
+    // override func start() { } // Error
+}
+
+// ✅ Subclassing public class inside the module
+class Truck: PublicVehicle {
+    // ❌ Cannot override public method
+    // override func drive() { } // Error
+}
+
+// ✅ Using internal class (module-only)
+class Bike: InternalVehicle {
+    override func drive() {
+        print("Bike is driving")
+    }
+}
+
+```
+**Using the Classes**
+```swift
+let myCar = Car()
+myCar.drive()  // Prints: Car is driving
+myCar.start()  // Prints: OpenVehicle started
+
+let myTruck = Truck()
+myTruck.drive() // Prints: PublicVehicle is driving
+myTruck.start() // Prints: PublicVehicle started
+
+let myBike = Bike()
+myBike.drive() // Prints: Bike is driving
+```
+| Feature                           | Open Class                | Public Class |
+| --------------------------------- | ------------------------- | ------------ |
+| Subclass inside module            | ✅ Yes                     | ✅ Yes        |
+| Subclass outside module           | ✅ Yes                     | ❌ No         |
+| Override method inside module     | ✅ Yes (if method is open) | ❌ No         |
+| Override method outside module    | ✅ Yes (if method is open) | ❌ No         |
+| Call method inside/outside module | ✅ Yes                     | ✅ Yes        |
+
+
+<br><br>

@@ -2166,3 +2166,101 @@ do {
 <br><br><br><br>
 
 
+# 📘 Memory Safety
+
+Swift is designed with `memory safety` at its core.	  
+That means the language helps you avoid unsafe operations such as:
+- Accessing memory that’s already deallocated  
+- Accessing the same memory from multiple places at the same time  
+- Writing the wrong type of value into memory  
+- Memory safety ensures that every variable in Swift owns a specific `region of memory` and only safe, exclusive, and type-correct access to that memory is allowed.
+
+<br><br>
+
+## Type Safety
+Swift is a `type-safe` language — which is the foundation of its memory safety.
+
+**Example**
+```swift
+var age: Int = 25
+age = "Hello" // ❌ Error: Cannot assign value of type 'String' to 'Int'
+```
+
+<br><br>
+
+## Conflicting Access to Memory
+- When multiple parts of your code try to access the same memory at the same time — and at least one of them is writing — Swift detects this and stops it.
+- These are called `Conflicting Accesses`.
+
+### 1️⃣ Conflicting Access to In-Out Parameters
+Swift requires exclusive access to variables passed as inout.
+```swift
+var number = 1
+
+func double(_ value: inout Int) {
+    value *= 2
+}
+
+double(&number) // ✅ OK
+```
+However, if you pass the same variable twice to a function expecting two `inout` parameters:
+```swift
+func swapValues(_ a: inout Int, _ b: inout Int) {
+    let temp = a
+    a = b
+    b = temp
+}
+
+var score = 10
+swapValues(&score, &score) // ❌ Error: conflicting access to 'score'
+```
+**Why?**	
+Because both parameters try to read and write to the same memory simultaneously —
+Swift blocks this to protect memory consistency.
+
+<br>
+
+### 2️⃣ Conflicting Access to self in Methods
+- Mutating methods in value types (struct or enum) implicitly modify self.
+- If you try to pass parts of self as inout while also modifying self, you’ll get a conflict.
+```swift
+struct Player {
+    var health = 10
+    mutating func balanceHealth(with teammate: inout Player) {
+        // ❌ Conflict: accessing self and teammate (possibly the same instance)
+        let average = (health + teammate.health) / 2
+        health = average
+        teammate.health = average
+    }
+}
+
+var player1 = Player()
+var player2 = Player()
+
+player1.balanceHealth(with: &player2) // ✅ OK
+player1.balanceHealth(with: &player1) // ❌ Conflict: self and teammate are same memory
+```
+
+<br>
+
+### 3️⃣ Conflicting Access to Properties
+When a structure has stored properties, accessing multiple properties as `inout` at once can lead to conflicts if they belong to the same instance.
+```swift
+struct Point {
+    var x, y: Int
+}
+
+var origin = Point(x: 1, y: 2)
+
+func move(_ a: inout Int, _ b: inout Int) {
+    a += 1
+    b += 1
+}
+
+// move(&origin.x, &origin.x) ❌ same property → conflict
+move(&origin.x, &origin.y)   // ✅ different properties → safe
+```
+- Here, origin.x and origin.y are stored in separate memory locations, so simultaneous access is allowed.			
+- But if both parameters refer to the same memory, Swift throws a compile-time error.
+
+<br><br><br><br>
